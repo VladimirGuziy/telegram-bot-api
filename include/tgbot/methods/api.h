@@ -46,6 +46,14 @@ public:
             const types::ReplyMarkup &replyMarkup = "") const;
 
   api_types::Message
+  sendPhotoData(const std::string &chatId, const unsigned char *data, const int data_size,
+            const std::string &fileName = "", const std::string &mimeType = "", const std::string &caption = "",
+            const bool &disableNotification = false,
+            const int &replyToMessageId = -1,
+            const types::ReplyMarkup &replyMarkup = "") const;
+
+
+  api_types::Message
   sendAudio(const std::string &chatId, const std::string &audio,
             const types::FileSource &source = types::FileSource::EXTERNAL,
             const std::string &mimeType = "", const std::string &caption = "",
@@ -346,7 +354,7 @@ public:
              const int &maxConnections = 40,
              const std::vector<api_types::UpdateType> &allowedUpdates = {});
 
-protected:
+//protected:
   Api() = default;
 
   Api(const std::string &token);

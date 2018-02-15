@@ -1995,6 +1995,33 @@ api_types::Message tgbot::methods::Api::sendPhoto(
   return api_types::Message(value.get("result", ""));
 }
 
+// sendPhotoData
+api_types::Message tgbot::methods::Api::sendPhotoData(
+    const std::string &chatId, const unsigned char *data, const int data_size, 
+    const std::string &fileName, const std::string &mimeType,
+    const std::string &caption, const bool &disableNotification,
+    const int &replyToMessageId, const types::ReplyMarkup &replyMarkup) const {
+
+  CURL *inst = http::curlEasyInit();
+  Json::Value value;
+  Json::Reader reader;
+
+  reader.parse(http::multiPartUploadData(inst, baseApi + "/sendPhoto", chatId,
+                                     "photo", mimeType, fileName, data, data_size , caption,
+                                     disableNotification, replyToMessageId,
+                                     replyMarkup.toString()),
+                 value);
+
+  curl_easy_cleanup(inst);
+
+  if (!value.get("ok", "").asBool())
+    throw TelegramException(value.get("description", "").asCString());
+
+  return api_types::Message(value.get("result", ""));
+
+
+}
+
 // sendAudio
 api_types::Message tgbot::methods::Api::sendAudio(
     const std::string &chatId, const std::string &audio,

@@ -10,6 +10,77 @@ static size_t write_data(const char *ptr, size_t nbs, size_t count,
   return count;
 }
 
+static
+void dump(const char *text,
+          FILE *stream, unsigned char *ptr, size_t size)
+{
+  size_t i;
+  size_t c;
+  unsigned int width=0x10;
+ 
+  fprintf(stream, "%s, %10.10ld bytes (0x%8.8lx)\n",
+          text, (long)size, (long)size);
+ 
+  for(i=0; i<size; i+= width) {
+    fprintf(stream, "%4.4lx: ", (long)i);
+ 
+    /* show hex to the left */
+    for(c = 0; c < width; c++) {
+      if(i+c < size)
+        fprintf(stream, "%02x ", ptr[i+c]);
+      else
+        fputs("   ", stream);
+    }
+ 
+    /* show data on the right */
+    for(c = 0; (c < width) && (i+c < size); c++) {
+      char x = (ptr[i+c] >= 0x20 && ptr[i+c] < 0x80) ? ptr[i+c] : '.';
+      fputc(x, stream);
+    }
+ 
+    fputc('\n', stream); /* newline */
+  }
+}
+ 
+static
+int my_trace(CURL *handle, curl_infotype type,
+             char *data, size_t size,
+             void *userp)
+{
+  const char *text;
+  (void)handle; /* prevent compiler warning */
+  (void)userp;
+ 
+  switch (type) {
+  case CURLINFO_TEXT:
+    fprintf(stderr, "== Info: %s", data);
+  default: /* in case a new one is introduced to shock us */
+    return 0;
+ 
+  case CURLINFO_HEADER_OUT:
+    text = "=> Send header";
+    break;
+  case CURLINFO_DATA_OUT:
+    text = "=> Send data";
+    break;
+  case CURLINFO_SSL_DATA_OUT:
+    text = "=> Send SSL data";
+    break;
+  case CURLINFO_HEADER_IN:
+    text = "<= Recv header";
+    break;
+  case CURLINFO_DATA_IN:
+    text = "<= Recv data";
+    break;
+  case CURLINFO_SSL_DATA_IN:
+    text = "<= Recv SSL data";
+    break;
+  }
+ 
+  dump(text, stderr, (unsigned char *)data, size);
+  return 0;
+}
+
 CURL *tgbot::utils::http::curlEasyInit() {
   CURL *curlInst = curl_easy_init();
   if (!curlInst)
@@ -68,6 +139,48 @@ std::string tgbot::utils::http::multiPartUpload(CURL *c,
 
   return body;
 }
+
+std::string tgbot::utils::http::multiPartUploadData(CURL *c,
+                                                const std::string &operation,
+                                                const std::string &chatId,
+                                                const std::string &type,
+                                                const unsigned char *data,
+                                                const int data_size) {
+
+  if (!c)
+    throw std::runtime_error("CURL is actually a null pointer");
+
+  curl_httppost *multiPost = nullptr;
+  curl_httppost *end = nullptr;
+  std::string body;
+
+  curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, "chat_id",
+               CURLFORM_COPYCONTENTS, chatId.c_str(), CURLFORM_END);
+
+  //curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, type.c_str(),
+  //             CURLFORM_CONTENTTYPE, mimeType.c_str(), CURLFORM_FILE,
+  //             filename.c_str(), CURLFORM_END);
+  /* Fill in the file upload field */
+  curl_formadd(&multiPost,
+              &end,
+              CURLFORM_COPYNAME, type.c_str(),
+              CURLFORM_BUFFER, "photo.jpg",
+              CURLFORM_BUFFERPTR, data,
+              CURLFORM_BUFFERLENGTH, data_size,
+              CURLFORM_END);
+
+
+  curl_easy_setopt(c, CURLOPT_HTTPPOST, multiPost);
+  curl_easy_setopt(c, CURLOPT_WRITEDATA, &body);
+  curl_easy_setopt(c, CURLOPT_URL, operation.c_str());
+
+  CURLcode code;
+  if ((code = curl_easy_perform(c)) != CURLE_OK)
+    throw std::runtime_error(curl_easy_strerror(code));
+
+  return body;
+}
+
 
 std::string
 tgbot::utils::http::multiPartUpload(CURL *c, const std::string &operation,
@@ -460,6 +573,7 @@ std::string tgbot::utils::http::multiPartUpload(
   curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, type.c_str(),
                CURLFORM_CONTENTTYPE, mimeType.c_str(), CURLFORM_FILE,
                filename.c_str(), CURLFORM_END);
+  
 
   if (caption != "")
     curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, "caption",
@@ -488,3 +602,61 @@ std::string tgbot::utils::http::multiPartUpload(
 
   return body;
 }
+
+std::string tgbot::utils::http::multiPartUploadData(
+    CURL *c, const std::string &operation, const std::string &chatId, const std::string &type, 
+    const std::string &mimeType, const std::string &fileName,
+    const unsigned char * data, const int data_size, const std::string &caption,
+    const bool &disableNotification, const int &replyToMessageId,
+    const std::string &replyMarkup) {
+  if (!c)
+    throw std::runtime_error("CURL is actually a null pointer");
+
+  curl_httppost *multiPost = nullptr;
+  curl_httppost *end = nullptr;
+  std::string body;
+
+  curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, "chat_id",
+               CURLFORM_COPYCONTENTS, chatId.c_str(), CURLFORM_END);
+
+  //curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, type.c_str(),
+  //             CURLFORM_CONTENTTYPE, mimeType.c_str(), CURLFORM_FILE,
+  //               filename.c_str(), CURLFORM_END);
+
+  curl_formadd(&multiPost,
+              &end,
+              CURLFORM_COPYNAME, type.c_str(),
+              CURLFORM_CONTENTTYPE, mimeType.c_str(),
+              CURLFORM_BUFFER, fileName.c_str(),
+              CURLFORM_BUFFERPTR, data,
+              CURLFORM_BUFFERLENGTH, (long)data_size,
+              CURLFORM_END);
+
+  if (caption != "")
+    curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, "caption",
+                 CURLFORM_COPYCONTENTS, caption.c_str(), CURLFORM_END);
+
+  if (disableNotification)
+    curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, "disable_notification",
+                 CURLFORM_COPYCONTENTS, "true", CURLFORM_END);
+
+  if (replyToMessageId != -1)
+    curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, "reply_to_message_id",
+                 CURLFORM_COPYCONTENTS,
+                 std::to_string(replyToMessageId).c_str(), CURLFORM_END);
+
+  if (replyMarkup != "")
+    curl_formadd(&multiPost, &end, CURLFORM_COPYNAME, "reply_markup",
+                 CURLFORM_COPYCONTENTS, replyMarkup.c_str(), CURLFORM_END);
+
+  curl_easy_setopt(c, CURLOPT_HTTPPOST, multiPost);
+  curl_easy_setopt(c, CURLOPT_WRITEDATA, &body);
+  curl_easy_setopt(c, CURLOPT_URL, operation.c_str());
+
+  CURLcode code;
+  if ((code = curl_easy_perform(c)) != CURLE_OK)
+    throw std::runtime_error(curl_easy_strerror(code));
+
+  return body;
+}
+

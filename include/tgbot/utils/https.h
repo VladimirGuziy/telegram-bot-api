@@ -41,6 +41,13 @@ std::string multiPartUpload(CURL *c, const std::string &operation,
                             const std::string &type,
                             const std::string &filename);
 
+std::string multiPartUploadData(CURL *c,
+                                const std::string &operation,
+                                const std::string &chatId,
+                                const std::string &type,
+                                const unsigned char *data,
+                                const int data_size); 
+
 // sendVideo
 std::string
 multiPartUpload(CURL *c, const std::string &operation,
@@ -58,6 +65,15 @@ multiPartUpload(CURL *c, const std::string &operation,
                 const std::string &type, const std::string &filename,
                 const std::string &caption, const bool &disableNotification,
                 const int &replyToMessageId, const std::string &replyMarkup);
+
+std::string
+multiPartUploadData(CURL *c, const std::string &operation,
+                const std::string &chatId, const std::string &type, 
+                const std::string &mimeType, const std::string &filename,
+                const unsigned char *data, const int data_size,
+                const std::string &caption, const bool &disableNotification,
+                const int &replyToMessageId, const std::string &replyMarkup);
+
 
 // sendAudio
 std::string
