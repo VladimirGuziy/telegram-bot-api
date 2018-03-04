@@ -97,14 +97,14 @@ public:
 struct InlineKeyboardButton {
 public:
   std::string text;
-  //::tgbot::types::Ptr<std::string> url;
-  //::tgbot::types::Ptr<std::string> callbackData;
-  //::tgbot::types::Ptr<std::string> switchInlineQuery;
-  //::tgbot::types::Ptr<std::string> switchInlineQueryCurrentChat;
-  std::string *url;
-  std::string *callbackData;
-  std::string *switchInlineQuery;
-  std::string *switchInlineQueryCurrentChat;
+  ::tgbot::types::Ptr<std::string> url;
+  ::tgbot::types::Ptr<std::string> callbackData;
+  ::tgbot::types::Ptr<std::string> switchInlineQuery;
+  ::tgbot::types::Ptr<std::string> switchInlineQueryCurrentChat;
+  //std::string *url;
+  //std::string *callbackData;
+  //std::string *switchInlineQuery;
+  //std::string *switchInlineQueryCurrentChat;
   /*!
    * @brief check tgbot::types::CallbackGame for further infos
    */
@@ -112,7 +112,7 @@ public:
   bool pay : 1;
   //InlineKeyboardButton(std::string _text, ::tgbot::types::Ptr<std::string> _callbackData) : text(_text), callbackData(_callbackData)
   //{
-//
+  //
   //}
 };
 
