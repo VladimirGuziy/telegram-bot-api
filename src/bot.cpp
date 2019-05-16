@@ -8,10 +8,9 @@ using namespace tgbot;
 tgbot::LongPollBot::LongPollBot(
     const std::string &token,
     const std::vector<types::UpdateType> &filterUpdates, const int &limit,
-    const int &timeout, 
-    const std::string proxyAddress)
+    const int &timeout)
 
-    : Bot(token, filterUpdates, limit, timeout, proxyAddress) {}
+    : Bot(token, filterUpdates, limit, timeout) {}
 
 tgbot::WebhookBot::WebhookBot(const std::string &token) : Bot(token) {}
 

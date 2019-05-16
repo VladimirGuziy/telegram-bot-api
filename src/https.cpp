@@ -4,6 +4,8 @@
 
 using namespace tgbot::utils::http;
 
+std::string tgbot::utils::http::proxyAddress = "";
+
 static size_t write_data(const char *ptr, size_t nbs, size_t count,
                          void *dest) {
   static_cast<std::string *>(dest)->append(ptr);

@@ -17,7 +17,7 @@ namespace utils {
 namespace http {
 
 
-std::string proxyAddress;
+extern std::string proxyAddress;
 
 /*!
  * @brief Very easy HTTP GET request using curl (see also: curlEasyInit() )
