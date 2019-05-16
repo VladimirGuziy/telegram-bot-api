@@ -86,6 +86,11 @@ CURL *tgbot::utils::http::curlEasyInit() {
   if (!curlInst)
     return nullptr;
 
+  if (http::proxyAddress != "")
+  {
+    curl_easy_setopt(curlInst, CURLOPT_PROXY, http::proxyAddress.c_str());
+  }
+  
   curl_easy_setopt(curlInst, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(curlInst, CURLOPT_WRITEFUNCTION, write_data);
 

@@ -184,7 +184,8 @@ tgbot::methods::Api::Api(
 tgbot::methods::Api::Api(
     const std::string &token,
     const std::vector<api_types::UpdateType> &allowedUpdates,
-    const int &timeout, const int &limit)
+    const int &timeout, const int &limit,
+    const std::string pAddress)
     : baseApi("https://api.telegram.org/bot" + token), currentOffset(0) {
 
   std::stringstream fullApiRequest;
@@ -197,6 +198,7 @@ tgbot::methods::Api::Api(
     removeComma(fullApiRequest, updateApiRequest);
   } else
     updateApiRequest = fullApiRequest.str();
+    http::proxyAddress = pAddress;
 }
 
 //

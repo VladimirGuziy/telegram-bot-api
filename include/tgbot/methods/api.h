@@ -359,9 +359,14 @@ public:
 
   Api(const std::string &token);
 
+  //Api(const std::string &token,
+  //    const std::vector<api_types::UpdateType> &allowedUpdates,
+  //    const int &timeout, const int &limit);
+
   Api(const std::string &token,
       const std::vector<api_types::UpdateType> &allowedUpdates,
-      const int &timeout, const int &limit);
+      const int &limit, const int &timeout,
+      const std::string proxyAddress = "");
 
   Api(const std::string &token, const std::string &url,
       const int &maxConnections,
@@ -377,6 +382,7 @@ public:
 
 private:
   const std::string baseApi;
+  const std::string proxyAddress;
   std::string updateApiRequest;
   int currentOffset;
 };

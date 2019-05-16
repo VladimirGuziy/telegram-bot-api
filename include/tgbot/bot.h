@@ -36,6 +36,8 @@ protected:
   Bot(TyArgs &&... many) : Api(std::forward<TyArgs>(many)...) {}
 
   void makeCallback(const std::vector<types::Update> &updates) const;
+private:
+  std::string proxyAddress;
 };
 
 /*!
@@ -54,7 +56,8 @@ public:
    */
   LongPollBot(const std::string &token,
               const std::vector<types::UpdateType> &filterUpdates = {},
-              const int &limit = 100, const int &timeout = 60);
+              const int &limit = 100, const int &timeout = 60,
+              const std::string proxyAddress = "");
 
   /*!
    * @brief start long polling
